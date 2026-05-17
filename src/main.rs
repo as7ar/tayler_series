@@ -1,16 +1,4 @@
 use std::f64::consts::PI;
-use tabled::{Table, Tabled};
-
-#[derive(Tabled)]
-struct Row {
-    degree: i64,
-    sin_real: f64,
-    sin_approx: f64,
-    sin_error: f64,
-    cos_real: f64,
-    cos_approx: f64,
-    cos_error: f64,
-}
 
 pub struct Func<F>
 where
@@ -36,7 +24,6 @@ fn factorial(n: i64) -> i64 {
     if n <= 1 {
         return 1;
     }
-
     n * factorial(n - 1)
 }
 
@@ -48,7 +35,7 @@ where
     let mut result = 0.0;
 
     while i <= n {
-        result += f.call(x, i);
+        result += (f.func)(x, i);
         i += 1;
     }
 
@@ -56,43 +43,30 @@ where
 }
 
 fn main() {
-    let sin_func = Func::new(|x, n| {
+
+    let sin = Func::new(|x, n| {
         let sign = if n % 2 == 0 { 1.0 } else { -1.0 };
         let power = 2 * n + 1;
-
         sign * x.powi(power as i32) / factorial(power) as f64
     });
 
-    let cos_func = Func::new(|x, n| {
-        let sign = if n % 2 == 0 { 1.0 } else { -1.0 };
-        let power = 2 * n;
-
-        sign * x.powi(power as i32) / factorial(power) as f64
+    let cos = Func::new(|x, n| {
+        let sign = if n%2==0 {1.0} else {-1.0};
+        let power = 2*n;
+        sign*x.powi(power as i32) / factorial(power) as f64
     });
-
-    let x = (11.0 * PI) / 6.0;
-
-    let mut rows = Vec::new();
-
+    
+    let x = (13f64*PI)/6f64;
+    
+    println!("각: {}", x);
+    println!("sin: {}, cos: {}", x.sin(), x.cos());
+    
     for i in 1..10 {
-        let sin_approx = sum(0, i, x, &sin_func);
-        let cos_approx = sum(0, i, x, &cos_func);
+        let result_sin = sum(0, i, x, &sin);
+        let result_cos = sum(0, i, x, &cos);
 
-        let sin_real = x.sin();
-        let cos_real = x.cos();
-
-        rows.push(Row {
-            degree: i,
-            sin_real,
-            sin_approx,
-            sin_error: (sin_real - sin_approx).abs(),
-            cos_real,
-            cos_approx,
-            cos_error: (cos_real - cos_approx).abs(),
-        });
+        println!("k={}까지", i);
+        println!("sin근사: {}, 오차: {}", result_sin, (x.sin()-result_sin).abs());
+        println!("cos근사: {}, 오차: {}", result_cos, (x.cos()-result_cos).abs());
     }
-
-    let table = Table::new(rows);
-
-    println!("{}", table);
 }
